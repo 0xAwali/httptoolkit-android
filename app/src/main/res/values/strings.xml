@@ -37,6 +37,32 @@
     <string name="try_again_button">Try again</string>
     <string name="test_button">Test interception</string>
 
+    <string name="manual_connect_title">Connect manually</string>
+    <string name="manual_connect_explanation">Enter the address of an intercepting proxy running on your network. This is usually HTTP Toolkit on your computer, but Burp Suite is supported too.\n\nOn an emulator, use 10.0.2.2 to reach your computer.</string>
+    <string name="manual_address_label">Address</string>
+    <string name="manual_address_hint">192.168.0.10</string>
+    <string name="manual_address_supporting">IP address or hostname, optionally with a port (e.g. 192.168.0.10:8000)</string>
+    <string name="manual_port_label">Port</string>
+    <string name="manual_advanced">Advanced</string>
+    <string name="manual_fingerprint_label">Certificate fingerprint (optional)</string>
+    <string name="manual_fingerprint_supporting">The SHA-256 fingerprint of the proxy\'s public key, in base64 or hex. If set, the connection is rejected unless the proxy\'s certificate matches.</string>
+    <string name="manual_certificate_warning">Without a fingerprint, whatever certificate this address returns will be trusted automatically. Only connect to addresses and networks you trust.</string>
+    <string name="manual_connect_action">Connect</string>
+    <string name="manual_connecting">Connecting…</string>
+
+    <string name="manual_error_address_invalid">Enter a valid IP address or hostname</string>
+    <string name="manual_error_port_invalid">Enter a port between 1 and 65535</string>
+    <string name="manual_error_fingerprint_invalid">Enter a SHA-256 fingerprint in base64 or hex</string>
+    <string name="manual_error_use_qr">That\'s an HTTP Toolkit QR code link. Use Scan/Paste QR code instead.</string>
+    <string name="manual_error_host_not_found">That address couldn\'t be found. Check it\'s spelled correctly, and that this device is on the same network.</string>
+    <string name="manual_error_connection_refused">The proxy refused the connection. Check the address and port, and that the proxy is listening for connections from other devices (not just localhost).</string>
+    <string name="manual_error_timed_out">The proxy didn\'t respond in time. Check that it\'s running and on the same network as this device, and that your firewall allows connections to it.</string>
+    <string name="manual_error_connection_failed">Couldn\'t connect to the proxy. Check the address and port, and that it\'s reachable from this device.</string>
+    <string name="manual_error_proxy_auth_required">This proxy requires authentication, which isn\'t supported. Turn off proxy authentication and try again.</string>
+    <string name="manual_error_no_proxy_certificate">Connected to the proxy, but couldn\'t download its CA certificate. HTTP Toolkit and Burp Suite are supported.</string>
+    <string name="manual_error_certificate_mismatch">The certificate returned doesn\'t match the fingerprint you entered.</string>
+    <string name="manual_error_unknown">Connection failed. Check the address and port, then try again.</string>
+
     <string name="qr_scan_prompt">Scan HTTP Toolkit QR code to connect</string>
     <string name="app_drawable">App Drawable</string>
     <string name="applications">Applications</string>
@@ -61,6 +87,7 @@
     <string name="open_settings">Open Settings</string>
 
     <string name="cd_more_options">More options</string>
+    <string name="cd_back">Go back</string>
     <string name="cd_add_port">Add port</string>
     <string name="cd_delete_port">Delete port %d</string>
     <string name="cd_app_icon">App icon for %s</string>

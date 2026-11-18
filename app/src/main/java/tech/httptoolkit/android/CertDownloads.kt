@@ -14,7 +14,7 @@ import java.security.cert.Certificate
 
 private val TAG = formatTag("tech.httptoolkit.android.CertDownloads")
 
-private const val CERT_FILENAME_BASE = "HTTP Toolkit Certificate"
+private const val CERT_FILENAME_BASE = "Proxy CA Certificate"
 private const val CERT_FILENAME_EXTENSION = ".crt"
 private const val CERT_MIME_TYPE = "application/x-x509-ca-cert"
 

@@ -38,6 +38,7 @@ import java.security.cert.X509Certificate
 import androidx.core.net.toUri
 import tech.httptoolkit.android.*
 import tech.httptoolkit.android.appselection.ApplicationListActivity
+import tech.httptoolkit.android.manual.ManualConnectActivity
 import tech.httptoolkit.android.portfilter.PortListActivity
 import tech.httptoolkit.android.qrscan.QRScanActivity
 import tech.httptoolkit.android.ui.HttpToolkitTheme
@@ -134,6 +135,28 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             }
         }
 
+    private val manualConnectLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                // The manual screen has already found & validated the proxy, so this config can
+                // go straight into the normal VPN & certificate setup.
+                val proxyConfig = result.data!!.extras?.let { extras ->
+                    BundleCompat.getParcelable(
+                        extras,
+                        IntentExtras.PROXY_CONFIG_EXTRA,
+                        ProxyConfig::class.java
+                    )
+                }
+
+                if (proxyConfig == null) {
+                    Log.w(TAG, "Manual connect returned no proxy config")
+                    Sentry.captureMessage("Manual connect returned no proxy config")
+                } else {
+                    launch { connectToVpn(proxyConfig) }
+                }
+            }
+        }
+
     private val cameraPermissionsFromSettings =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             checkCameraPermission()
@@ -205,6 +228,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                     ),
                     actions = MainScreenActions(
                         onScanQRCode = { scanOrPasteQRCode() },
+                        onConnectManually = { connectManually() },
                         onReconnect = { reconnect() },
                         onDisconnect = { disconnect() },
                         onRecoverAfterFailure = { recoverAfterFailure() },
@@ -418,11 +442,15 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             checkCameraPermission()
         } else {
-            // No camera to fall back to, no clipboard URL - just explain
+            // No camera to fall back to and no clipboard URL: manual setup is the only option.
             MaterialAlertDialogBuilder(this)
                 .setTitle("No connect URL or camera available")
-                .setMessage("Copy an HTTP Toolkit QR code URL to the clipboard then try again.")
-                .setPositiveButton(android.R.string.ok) { _, _ -> }
+                .setMessage(
+                    "Copy an HTTP Toolkit QR code URL to the clipboard and try again, or enter " +
+                    "the address of the computer running HTTP Toolkit manually."
+                )
+                .setNegativeButton(android.R.string.cancel) { _, _ -> }
+                .setPositiveButton(R.string.manual_button) { _, _ -> connectManually() }
                 .show()
         }
     }
@@ -448,6 +476,23 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
     private fun scanQRCode() {
         barcodeLauncher.launch(Intent(this, QRScanActivity::class.java))
+    }
+
+    /**
+     * Opens the manual connection form. The proxy probe happens while that screen is open, so the
+     * local network permission (needed to reach a LAN address at all on newer Android versions)
+     * has to be requested first, and we don't want to start while a connection is already running.
+     */
+    private fun connectManually() {
+        if (mainState != ConnectionState.DISCONNECTED && mainState != ConnectionState.FAILED) {
+            Log.i(TAG, "Ignoring manual connect while $mainState")
+            return
+        }
+
+        launch {
+            ensureLocalNetworkPermission()
+            manualConnectLauncher.launch(Intent(this@MainActivity, ManualConnectActivity::class.java))
+        }
     }
 
     private suspend fun connectToVpn(config: ProxyConfig) {
@@ -745,7 +790,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 .setIcon(R.drawable.ic_info_circle)
                 .setMessage(
                     "To intercept HTTPS traffic from this device, you need to " +
-                    "trust your HTTP Toolkit's certificate authority. " +
+                    "trust the proxy's certificate authority. " +
                     "\n\n" +
                     "Please accept the following prompts to allow this." +
                     if (!isDeviceSecured(applicationContext))
@@ -756,7 +801,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 )
                 .setPositiveButton("Install") { _, _ ->
                     val certInstallIntent = KeyChain.createInstallIntent()
-                    certInstallIntent.putExtra(EXTRA_NAME, "HTTP Toolkit CA")
+                    certInstallIntent.putExtra(EXTRA_NAME, "Interception Proxy CA")
                     certInstallIntent.putExtra(EXTRA_CERTIFICATE, certificate.encoded)
                     startSetupActivityForResult(certInstallIntent, INSTALL_CERT_REQUEST)
                 }
@@ -775,7 +820,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                     Html.fromHtml(
                         """
                         <p>
-                            To allow HTTP Toolkit to intercept HTTPS traffic:
+                            To allow this proxy to intercept HTTPS traffic:
                         </p>
                         <ul>
                             ${
@@ -827,7 +872,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             .setTitle("Certificate download failed")
             .setIcon(R.drawable.ic_exclamation_triangle)
             .setMessage(
-                "HTTP Toolkit could not save its certificate into your Downloads folder, so " +
+                "The proxy certificate could not be saved into your Downloads folder, so " +
                 "there's no certificate there for you to install." +
                 "\n\n" +
                 "Check that your device has storage space available, and then try again."

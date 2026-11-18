@@ -57,6 +57,7 @@ data class MainScreenState(
 
 data class MainScreenActions(
     val onScanQRCode: () -> Unit,
+    val onConnectManually: () -> Unit,
     val onReconnect: () -> Unit,
     val onDisconnect: () -> Unit,
     val onRecoverAfterFailure: () -> Unit,
@@ -316,6 +317,10 @@ private fun ActionButtons(
                     if (screenState.hasCamera) R.string.scan_button else R.string.paste_button
                 ),
                 onClick = actions.onScanQRCode
+            )
+            SecondaryButton(
+                text = stringResource(R.string.manual_button),
+                onClick = actions.onConnectManually
             )
             if (screenState.lastProxy != null) {
                 SecondaryButton(

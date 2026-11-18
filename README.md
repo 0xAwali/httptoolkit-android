@@ -10,7 +10,7 @@ HTTP Toolkit is primarily a desktop application. This repo contains the Android 
 
 The Android app itself is effectively two parts:
 
-* An outer wrapper, which shows the UI, scans QR codes, retrieves proxy config from HTTP Toolkit, ensures the device trusts HTTP Toolkit's CA certificate, and starts and stops a VPN.
+* An outer wrapper, which shows the UI, scans QR codes (or accepts a manually entered proxy address), retrieves proxy config from HTTP Toolkit, ensures the device trusts HTTP Toolkit's CA certificate, and starts and stops a VPN.
 * A VPN, which receives every IP packet sent by the device, parses them, rewrites some of them to go to HTTP Toolkit, and then sends the parsed requests on via the real network (and forwards responses back)
 
 ## Contributing

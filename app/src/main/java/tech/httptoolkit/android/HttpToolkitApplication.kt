@@ -32,6 +32,8 @@ private const val APP_CRASHED_PREF = "app-crashed"
 private const val FIRST_RUN_PREF = "is-first-run"
 private const val HTTP_TOOLKIT_PREFERENCES_NAME = "tech.httptoolkit.android"
 private const val LAST_PROXY_CONFIG_PREF_KEY = "last-proxy-config"
+private const val LAST_MANUAL_PROXY_HOST_PREF_KEY = "last-manual-proxy-host"
+private const val LAST_MANUAL_PROXY_PORT_PREF_KEY = "last-manual-proxy-port"
 private const val TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss"
 
 private val isProbablyEmulator =
@@ -180,6 +182,23 @@ class HttpToolkitApplication : Application() {
             } else {
                 prefs.edit { remove(LAST_PROXY_CONFIG_PREF_KEY) }
             }
+        }
+
+    /** The last address the user typed into the manual connection screen, for prefill. */
+    var lastManualProxyHost: String?
+        get() = prefs.getString(LAST_MANUAL_PROXY_HOST_PREF_KEY, null)
+        set(value) {
+            prefs.edit {
+                if (value != null) putString(LAST_MANUAL_PROXY_HOST_PREF_KEY, value)
+                else remove(LAST_MANUAL_PROXY_HOST_PREF_KEY)
+            }
+        }
+
+    /** The last port the user typed into the manual connection screen, for prefill. */
+    var lastManualProxyPort: Int
+        get() = prefs.getInt(LAST_MANUAL_PROXY_PORT_PREF_KEY, Constants.DEFAULT_PROXY_PORT)
+        set(value) {
+            prefs.edit { putInt(LAST_MANUAL_PROXY_PORT_PREF_KEY, value) }
         }
 
     var uninterceptedApps: Set<String>

@@ -12,4 +12,7 @@ object IntentExtras {
 
 object Constants {
     const val QR_CODE_URL_PREFIX = "https://android.httptoolkit.tech/connect/"
+
+    /** The port HTTP Toolkit's proxy listens on unless the user has changed it. */
+    const val DEFAULT_PROXY_PORT = 8000
 }
